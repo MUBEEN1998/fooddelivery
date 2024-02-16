@@ -1,5 +1,6 @@
 import { query } from "express";
 import connection from "../connection.js";
+import jwt from "jsonwebtoken";
 
 export const usersignup = (req, res) => {
     let user = req.body;
@@ -21,5 +22,28 @@ export const usersignup = (req, res) => {
         }
     });
 };
+o]
 
+const jwt = require('jsonwebtoken');
 
+const login = (req, res) => {
+    const { email } = req.body;
+    const query = "SELECT * FROM users WHERE email=?";
+    connection.query(query, [email], (err, result) => {
+        if (!err) {
+            if(result.length <=0 || result[0].password !=password){
+                return res.status(401).json({message:"incorret useremail or password"})
+            }
+        } else {
+            if (result.length > 0) {
+                const user = result[0];
+                const token = jwt.sign({ email: user.email, id: user.id }, 'secretkey', { expiresIn: '1h' });
+                res.status(200).json({ message: "Login successful", token: token });
+            } else {
+                res.status(404).json({ message: "User not found" });
+            }
+        }
+    });
+};
+
+module.exports = login;
