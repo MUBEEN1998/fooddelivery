@@ -1,6 +1,7 @@
 import { query } from "express";
 import connection from "../connection.js";
 import jwt from "jsonwebtoken";
+import nodemailer from 'nodemailer'
 
 export const usersignup = (req, res) => {
     let user = req.body;
@@ -51,6 +52,50 @@ export const login = (req, res) => {
 };
 
 
+let transporter_email=nodemailer.createTransport({
+    service:"gmail",
+    auth:{
+        user:process.env.EMAIL,
+        pass:process.env.PASSWORD
+    }
+})
+
+
+export const  forgotpassword=async(req,res)=>{
+
+    const user=await req.body;
+    const query="select email,password from users where email=?"
+    connection.query(query,[user.email],(err,result)=>{
+        if(!err){
+            if(result.length <=0){
+            return res.status(200).json({message:"your email is incorrect "})
+                
+            }else{
+                const mailoption={
+                    from:process.env.EMAIL,
+                    to:result[0].email,
+                    subject:"password by dafe management system",
+                    html:'<p><b> your login details for cafe management system </b><br><b>Email:</b></p>'+result[0].email+'<br><b>password:'+result[0].password+'=</b></p>'
+                }
+                transporter_email.sendMail(mailoption,function(err,info){
+                    if(err){
+                        console.log(err);
+                    }else{
+                        console.log('email sent :'+info.response)
+                    }
+                })
+            return res.status(200).json({message:"password sent successfull to your email "})
+                
+                
+
+            }
+
+        }else{
+            return res.status(500).json(err)
+        }
+    })
+
+}
 
 
 
