@@ -97,6 +97,26 @@ export const  forgotpassword=async(req,res)=>{
 
 }
 
+export const usersInformation = async (req, res) => {
+    try {
+        const query = "SELECT * FROM users WHERE role = ?";
+        connection.query(query, ['user'], (err, result) => {
+            if (err) {
+                console.error("Database error:", err);
+                return res.status(500).json({ message: "Internal server error" });
+            }
+            if (result && result.length > 0) {
+                return res.status(200).json({ users: result });
+            } else {
+                return res.status(404).json({ message: "No users found" });
+            }
+        });
+    } catch (error) {
+        console.error("Server error:", error);
+        return res.status(500).json({ message: "Internal server error" });
+    }
+};
+
 
 
 
