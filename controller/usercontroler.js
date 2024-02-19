@@ -117,6 +117,45 @@ export const usersInformation = async (req, res) => {
     }
 };
 
+export const userupdate = async (req, res) => {
+    // console.log(req.query)
+    try {
+        const { id, name, contact_number, email, status } = req.body;
+
+        if (!id || !name || !contact_number || !email || !status) {
+            console.log(id, name, contact_number, email, status,'mmmmmmmmmmm')
+            return res.status(400).json({ message: "Missing required fields" });
+        }
+
+        const query = `
+            UPDATE users
+            SET name = ?, contact_number = ?, email = ?, status = ?
+            WHERE id = ?;
+        `;
+
+        connection.query(query, [name, contact_number, email, status, id], (error, result) => {
+            if (error) {
+                return res.status(500).json({ message: error });
+            } else {
+                if (result.affectedRows > 0) {
+                    const nequery='select * from users where id=?'
+                    connection.query(nequery,[id],(err,result)=>{
+                        if(!err){
+                    return res.status(200).json({ message: "User updated successfully",data:result});
+                            
+                        }
+                    })
+                } else {
+                    return res.status(404).json({ message: "User not found" });
+                }
+            }
+        });
+
+    } catch (error) {
+        return res.status(500).json({ message: error });
+    }
+};
+
 
 
 
